@@ -7,9 +7,9 @@ export default function Default() {
   const { auth } = useAuth();
   console.log(auth);
   return (
-    <div className="bg-back overflow-y-hidden overflow-hidden">
+    <div className="bg-back min-h-screen">
       <Navbar />
-      <MainContent />
+
       <Outlet />
     </div>
   );

@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import AuthContext from "../../context/authContext";
 import useAuth from "../../hooks/useAuth";
 import axiosClient from "../../axios-client";
+import Spinner from "../../components/Spinner";
 
 async function loginHandler(payload, setAuth, setLoading, navigate) {
   try {
@@ -24,6 +25,7 @@ export default function Login() {
   const userRef = useRef();
   const passRef = useRef();
   const [loading, setLoading] = useState(false);
+
   document.body.className = "overflow-hidden";
   const submitHandler = (e) => {
     e.preventDefault();
@@ -53,7 +55,7 @@ export default function Login() {
             <label htmlFor="">Password</label>
             <input type="password" ref={passRef} className="text-primary px-2 py-1 rounded-md outline-none" />
             <button type="submit" className="px-2 py-1 bg-accent rounded-md">
-              {loading ? "..." : "Login"}
+              {loading ? <Spinner /> : "Login"}
             </button>
           </form>
           <div className="w-full h-[1px] my-4 bg-white/90"></div>

@@ -1,7 +1,3 @@
-export default function CardCaption({ children, className }) {
-  return (
-    <div className={"text-center font-light text-sm " + className}>
-      <p>{children}</p>
-    </div>
-  );
+export default function CardCaption({ children, className = "" }) {
+  return <h2 className={" font-light text-sm " + className}>{children}</h2>;
 }
