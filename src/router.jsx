@@ -5,6 +5,7 @@ import Register from "./page/Register";
 import PersistLogin from "./layouts/PersistLogin";
 import Cart from "./container/Cart";
 import MainContent from "./components/Main/MainContent";
+import Transaction from "./container/Transaction";
 
 const router = createBrowserRouter([
   {
@@ -14,6 +15,7 @@ const router = createBrowserRouter([
         element: <Default />,
         children: [
           { path: "cart", element: <Cart /> },
+          { path: "success", element: <Transaction /> },
           { path: "/", element: <MainContent />, children: [{ path: "login", element: <Login /> }] },
         ],
       },
