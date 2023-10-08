@@ -11,9 +11,13 @@ import CartItem from "../../features/CartItem";
 const getCart = async (setData, setLoading, axiosClient) => {
   try {
     const response = await axiosClient.get("/carts");
+    console.log(response.data);
     setData(() => {
       const temp = response.data.map((item) => {
-        return { ...item, checked: false };
+        const product_stock = item.product.stock.filter((st) => {
+          return st.size_id == item.size._id;
+        })[0];
+        return { ...item, checked: false, stock: product_stock.quantity };
       });
       return temp;
     });
@@ -59,6 +63,7 @@ function Cart() {
       products: array.map((arr) => {
         return {
           id: arr._id,
+          product_id: arr.product._id,
           name: arr.product.name,
           quantity: arr.quantity,
           price: arr.product.price,
@@ -135,7 +140,11 @@ function Cart() {
                 <div className="border-t my-4  border-white ">
                   <h2 className="text-2xl pt-4 font-semibold">Total Price : {rupiahFormater(total.prices)}</h2>
                 </div>
-                <button className="bg-accent rounded-md font-semibold py-3 w-full text-xl hover:bg-violet-800 transition-all" onClick={checkoutHandler}>
+                <button
+                  disabled={total?.prices <= 0}
+                  className={`${total?.prices <= 0 ? "bg-gray-500" : "bg-accent hover:bg-violet-800"} cursor-pointer rounded-md font-semibold py-3 w-full text-xl  transition-all`}
+                  onClick={checkoutHandler}
+                >
                   Checkout
                 </button>
               </div>

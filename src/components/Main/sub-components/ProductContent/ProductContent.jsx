@@ -8,12 +8,11 @@ import rupiahFormater from "../../../../formater/rupiahFormater";
 import useAxiosPrivate from "../../../../hooks/useAxiosPrivate";
 import useAuth from "../../../../hooks/useAuth";
 import jwtDecode from "jwt-decode";
-import { useNavigate } from "react-router-dom";
 import Spinner from "../../../Spinner";
 
 const sendCart = async (axiosPrivate, payload, setLoading, setIsOpen, setSize, setQuantity) => {
   try {
-    const response = await axiosPrivate.post(`/carts?quantity=${payload.quantity}&user=${payload.user}&size=${payload.size}&product=${payload.product}`);
+    await axiosPrivate.post(`/carts?quantity=${payload.quantity}&user=${payload.user}&size=${payload.size}&product=${payload.product}`);
     document.body.className = "";
     setSize("");
     setQuantity(1);
@@ -62,20 +61,42 @@ export default function ProductContent({ product }) {
   };
   const subHandler = () => {
     if (quantity > 1) {
+      setErrors({});
       setQuantity((prev) => {
         return prev - 1;
       });
     }
   };
   const addHandler = () => {
-    setQuantity((prev) => {
-      return prev + 1;
+    setErrors({});
+    const product_stock = product?.stock?.filter((st) => {
+      return st.size_id._id == size;
     });
+    if (product_stock[0]?.quantity > quantity) {
+      setQuantity((prev) => {
+        return prev + 1;
+      });
+    } else if (product_stock.length < 1) {
+      setErrors((prev) => {
+        let temp = { ...prev };
+        temp.status = 400;
+        temp.message = "Please select size first";
+        return temp;
+      });
+    } else {
+      setErrors((prev) => {
+        let temp = { ...prev };
+        temp.status = 400;
+        temp.message = " Cannot add more, Run out of stock";
+        return temp;
+      });
+    }
   };
+
   return (
     <>
-      <Card className="hover:scale-105 cursor-pointer group " onClick={openModal}>
-        <img src={import.meta.env.VITE_BASE_URL + "/" + product.image} className="h-[300px] object-contain" alt="uwu" />
+      <Card className="hover:bg-primary cursor-pointer group bg-back" onClick={openModal}>
+        <img src={import.meta.env.VITE_BASE_URL + "/" + product.image} className=" h-[300px] object-cover" alt="uwu" />
         <CardTitle className="group-hover:text-white/75 transition-all text-white font-medium md:text-base text-left h-14 line-clamp-2">{product.name}</CardTitle>
         <CardCaption className="text-white font-semibold text-xl text-left group-hover:text-accent transition-colors">{rupiahFormater(product.price)}</CardCaption>
       </Card>
@@ -100,16 +121,21 @@ export default function ProductContent({ product }) {
                   <div className="grid grid-cols-5 gap-1 text-base">
                     {product.stock.map((s, i) => {
                       return (
-                        <button
-                          key={i}
-                          onClick={() => {
-                            console.log(s.size_id._id);
-                            setSize(s.size_id._id);
-                          }}
-                          className={`border-accent/50 border-2 py-1 ${size == s.size_id._id && "bg-accent"} rounded-md`}
-                        >
-                          {s.size_id.name}
-                        </button>
+                        <div key={i} className="w-fit flex flex-col items-center">
+                          <button
+                            onClick={() => {
+                              setErrors({});
+                              setSize(s.size_id._id);
+                              if (quantity > s.quantity) {
+                                setQuantity(s.quantity);
+                              }
+                            }}
+                            className={`border-accent/50 border-2 flex space-y-0 w-fit px-4 justify-center items-center py-1 ${size == s.size_id._id && "bg-accent"} rounded-md`}
+                          >
+                            <h2>{s.size_id.name} </h2>
+                          </button>
+                          <h2> Stock : {s.quantity}</h2>
+                        </div>
                       );
                     })}
                   </div>
@@ -118,7 +144,14 @@ export default function ProductContent({ product }) {
                     <button onClick={subHandler} className="px-3 py-2 min-w-[40px] bg-violet-500 rounded-md flex justify-center items-center">
                       -
                     </button>
-                    <input type="number" className="text-primary rounded-md px-2" value={quantity} />
+                    <input
+                      type="number"
+                      className="text-primary rounded-md px-2"
+                      value={quantity}
+                      onChange={(e) => {
+                        setQuantity(parseInt(e.target.value));
+                      }}
+                    />
                     <button onClick={addHandler} className="px-3 py-2 min-w-[40px] bg-violet-500 rounded-md flex justify-center items-center">
                       +
                     </button>
@@ -128,7 +161,7 @@ export default function ProductContent({ product }) {
                   <button disabled={!auth ? true : loading} onClick={addToCartHandler} className="bg-accent hover:bg-violet-950 transition-colors  py-2 px-4 text-white/90 rounded-lg">
                     {loading ? <Spinner /> : "Add to Cart "}
                   </button>
-                  <p>{product.desc}</p>
+                  <p>{product?.desc}</p>
                 </div>
               </div>
             </div>
