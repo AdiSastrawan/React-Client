@@ -1,43 +1,43 @@
-import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import axiosClient from "../axios-client";
-import useAuth from "../hooks/useAuth";
+import { useEffect, useRef, useState } from "react"
+import { Link, useNavigate } from "react-router-dom"
+import axiosClient from "../axios-client"
+import useAuth from "../hooks/useAuth"
 
 const sendRegister = async (navigate, payload, setAuth, setLoading) => {
   try {
-    const response = await axiosClient.post("/register", payload);
-    setAuth(response.data.accessToken);
-    navigate("/");
+    const response = await axiosClient.post("/register", payload)
+    setAuth(response.data.accessToken)
+    navigate("/verify-account")
   } catch (error) {
-    console.error(error);
+    console.error(error)
   } finally {
-    setLoading(false);
+    setLoading(false)
   }
-};
+}
 
 export default function Register() {
-  const { auth, setAuth } = useAuth();
-  const [loading, setLoading] = useState(false);
-  const username = useRef();
-  const email = useRef();
-  const password = useRef();
-  const confirm_password = useRef();
-  const navigate = useNavigate();
+  const { auth, setAuth } = useAuth()
+  const [loading, setLoading] = useState(false)
+  const username = useRef()
+  const email = useRef()
+  const password = useRef()
+  const confirm_password = useRef()
+  const navigate = useNavigate()
 
   const submitHandler = (e) => {
-    e.preventDefault();
-    setLoading(true);
+    e.preventDefault()
+    setLoading(true)
     let payload = {
       username: username.current.value,
       email: email.current.value,
       password: password.current.value,
       confirm_password: confirm_password.current.value,
-    };
-    sendRegister(navigate, payload, setAuth, setLoading);
+    }
+    sendRegister(navigate, payload, setAuth, setLoading)
     // console.log(auth);
     // console.log("submitted");
     // navigate("/");
-  };
+  }
 
   return (
     <div className="bg-back min-h-screen flex justify-center items-center text-black">
@@ -68,5 +68,5 @@ export default function Register() {
         </p>
       </div>
     </div>
-  );
+  )
 }

@@ -7,7 +7,7 @@ function rupiahFormater(amount) {
   let formattedNumber = amount.toLocaleString("id-ID");
 
   // Add the Rupiah symbol (Rp) and return the formatted string
-  return `Rp ${formattedNumber}`;
+  return `Rp. ${formattedNumber}`;
 }
 
 export default rupiahFormater;
