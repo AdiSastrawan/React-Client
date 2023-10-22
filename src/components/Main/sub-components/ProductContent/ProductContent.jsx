@@ -1,5 +1,4 @@
-import { useState } from "react";
-import image1 from "../../../../assets/1.png";
+import { useRef, useState } from "react";
 import Card from "./sub-components/Card";
 import CardCaption from "./sub-components/CardCaption";
 import CardTitle from "./sub-components/CardTitle";
@@ -9,46 +8,53 @@ import useAxiosPrivate from "../../../../hooks/useAxiosPrivate";
 import useAuth from "../../../../hooks/useAuth";
 import jwtDecode from "jwt-decode";
 import Spinner from "../../../Spinner";
+import { AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Button, useDisclosure, useToast } from "@chakra-ui/react";
 
-const sendCart = async (axiosPrivate, payload, setLoading, setIsOpen, setSize, setQuantity) => {
+const sendCart = async (axiosPrivate, payload, setLoading, setOpen, setSize, setQuantity, onClose, toast) => {
   try {
-    await axiosPrivate.post(`/carts?quantity=${payload.quantity}&user=${payload.user}&size=${payload.size}&product=${payload.product}`);
+    const res = await axiosPrivate.post(`/carts?quantity=${payload.quantity}&user=${payload.user}&size=${payload.size}&product=${payload.product}`);
+    if (res.status != 200) {
+      throw new Error(res);
+    }
     document.body.className = "";
     setSize("");
     setQuantity(1);
-    setIsOpen(false);
+    toast({
+      title: "Item Added to Cart",
+      description: "Item sucessfully Added",
+      status: "success",
+      duration: 9000,
+      position: "bottom-right",
+      isClosable: true,
+    });
+    setOpen(false);
   } catch (error) {
     console.log(error);
   } finally {
+    onClose();
     setLoading(false);
   }
 };
 
 export default function ProductContent({ product }) {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const toast = useToast();
   const axiosPrivate = useAxiosPrivate();
   const { auth } = useAuth();
-  const [isOpen, setIsOpen] = useState(false);
+  const cancelRef = useRef();
+  const [Open, setOpen] = useState(false);
   const [errors, setErrors] = useState({});
   const [size, setSize] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
   const openModal = () => {
-    setIsOpen(() => {
+    setOpen(() => {
       return true;
     });
     const body = document.body;
     body.className = "overflow-hidden";
   };
   const addToCartHandler = () => {
-    if (size.length < 1) {
-      setErrors((prev) => {
-        let temp = { ...prev };
-        temp.status = 400;
-        temp.message = "Please enter size !";
-        return temp;
-      });
-      return;
-    }
     setLoading(true);
     const payload = {
       quantity: quantity,
@@ -57,7 +63,7 @@ export default function ProductContent({ product }) {
       product: product._id,
     };
     console.log(quantity, size, jwtDecode(auth).id, product._id);
-    sendCart(axiosPrivate, payload, setLoading, setIsOpen, setSize, setQuantity);
+    sendCart(axiosPrivate, payload, setLoading, setOpen, setSize, setQuantity, onClose, toast, setErrors);
   };
   const subHandler = () => {
     if (quantity > 1) {
@@ -95,14 +101,41 @@ export default function ProductContent({ product }) {
 
   return (
     <>
-      <Card className="hover:bg-primary cursor-pointer group bg-back" onClick={openModal}>
+      <Card className="hover:bg-primary bg-violetcursor-pointer group bg-back" onClick={openModal}>
         <img src={import.meta.env.VITE_BASE_URL + "/" + product.image} className=" h-[300px] object-cover" alt="uwu" />
         <CardTitle className="group-hover:text-white/75 transition-all text-white font-medium md:text-base text-left h-14 line-clamp-2">{product.name}</CardTitle>
         <CardCaption className="text-white font-semibold text-xl text-left group-hover:text-accent transition-colors">{rupiahFormater(product.price)}</CardCaption>
       </Card>
+      <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose}>
+        <AlertDialogOverlay>
+          <AlertDialogContent bgColor={"#0d1117"}>
+            <AlertDialogHeader fontSize="lg" fontWeight="bold" color="white">
+              Add Item to Cart
+            </AlertDialogHeader>
 
-      {isOpen && (
-        <Modal isOpen={isOpen} setIsOpen={setIsOpen}>
+            <AlertDialogBody color="white">Are you sure?</AlertDialogBody>
+
+            <AlertDialogFooter>
+              <Button ref={cancelRef} onClick={onClose}>
+                Cancel
+              </Button>
+              <Button
+                color="white"
+                _hover={{
+                  background: "rgb(76, 29, 149)",
+                }}
+                bgColor={"#784ED5"}
+                onClick={addToCartHandler}
+                ml={3}
+              >
+                {loading ? <Spinner /> : "Add to Cart "}
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
+      {Open && (
+        <Modal isOpen={Open} setIsOpen={setOpen}>
           <div className="max-h-[520px] mt-10 my-5 bg-primary rounded-md flex items-center flex-col overflow-y-auto overflow-x-hidden">
             <h2 className="pt-4  font-black text-3xl">{product.name}</h2>
             <div className="bg-primary gap-10 px-10 py-5 w-full grid grid-cols-2">
@@ -158,8 +191,23 @@ export default function ProductContent({ product }) {
                   </div>
                   {!auth && <h1 className="bg-red-500 py-2 px-2 rounded-md">Login first before you add it to your cart!</h1>}
                   {Object.keys(errors).length !== 0 && <h1 className="bg-red-500 py-2 px-2 rounded-md">{errors.message}</h1>}
-                  <button disabled={!auth ? true : loading} onClick={addToCartHandler} className="bg-accent hover:bg-violet-950 transition-colors  py-2 px-4 text-white/90 rounded-lg">
-                    {loading ? <Spinner /> : "Add to Cart "}
+                  <button
+                    disabled={!auth || quantity === 0 ? true : loading}
+                    onClick={() => {
+                      if (size.length < 1) {
+                        setErrors((prev) => {
+                          let temp = { ...prev };
+                          temp.status = 400;
+                          temp.message = "Please enter size !";
+                          return temp;
+                        });
+                        return;
+                      }
+                      onOpen();
+                    }}
+                    className={`${!auth || quantity === 0 ? "bg-gray-500" : "bg-accent hover:bg-violet-950"}  transition-colors min-w-[200px]  py-2 px-4 text-white/90 rounded-lg`}
+                  >
+                    Add to Cart
                   </button>
                   <p>{product?.desc}</p>
                 </div>

@@ -8,7 +8,6 @@ import useProductFetch from "../../hooks/useProductFetch";
 
 export default function MainContent() {
   const { data, loading, lastPostElement } = useProductFetch();
-  console.log(data);
   return (
     <main id="main" className=" bg-back min-h-screen pt-16 z-50">
       <section className="-z-20">
@@ -23,11 +22,11 @@ export default function MainContent() {
         </Suspense>
       </section>
       {loading && (
-        <div className=" py-5 flex justify-center items-center">
+        <div className=" py-5 w-full flex justify-center items-center">
           <Spinner />
         </div>
       )}
-      <h2 ref={lastPostElement}>render here bro</h2>
+      <div className=" py-2 w-full " ref={lastPostElement}></div>
       <Outlet />
     </main>
   );
