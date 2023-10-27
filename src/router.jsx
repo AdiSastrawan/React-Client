@@ -10,6 +10,8 @@ import Checkout from "./container/Checkout"
 import Error from "./container/Error"
 import RequireAuth from "./layouts/RequireAuth"
 import VerifyAccount from "./page/VerifyAccount"
+import ResetPassword from "./page/ResetPassword"
+import VerifyResetPassword from "./page/VerifyResetPassword"
 
 const router = createBrowserRouter([
   {
@@ -33,6 +35,8 @@ const router = createBrowserRouter([
   },
 
   { path: "/register", element: <Register /> },
+  { path: "/reset-password", element: <ResetPassword /> },
+  { path: "/verify-reset-password", element: <VerifyResetPassword /> },
   { path: "/verify-account", element: <VerifyAccount /> },
 ])
 

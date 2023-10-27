@@ -38,14 +38,19 @@ export default function Register() {
     // console.log("submitted");
     // navigate("/");
   }
+  const validationHandler = (e) => {
+    // if(e.target.name == "username"){
+    // }
+  }
 
   return (
     <div className="bg-back min-h-screen flex justify-center items-center text-black">
       <div className="lg:w-1/2">
         <h1 className="text-3xl text-white text-center py-4 font-bold">Register</h1>
-        <form className="flex flex-col text-white space-y-2" action="" onSubmit={submitHandler}>
+        <form className="flex flex-col text-white space-y-1" action="" onSubmit={submitHandler}>
           <label htmlFor="username">Username</label>
-          <input className="rounded-md px-2 py-1 text-black" type="text" ref={username} name="username" placeholder="Username" />
+          <input className="rounded-md px-2 py-1 text-black" onInput={validationHandler} type="text" ref={username} name="username" placeholder="Username" />
+          <p className="text-red-600 text-xs">At least one</p>
           <label htmlFor="email">Email</label>
           <input className="rounded-md px-2 py-1 text-black" type="text" ref={email} name="email" placeholder="Email" />
           <label htmlFor="password">Password</label>

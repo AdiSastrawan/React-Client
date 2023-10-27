@@ -58,6 +58,11 @@ export default function Login() {
               {loading ? <Spinner /> : "Login"}
             </button>
           </form>
+          <div className="w-full px-2 pt-2">
+            <Link to={"/reset-password"} className="text-xs text-left hover:text-accent transition-all">
+              Forgot Password?
+            </Link>
+          </div>
           <div className="w-full h-[1px] my-4 bg-white/90"></div>
           <div>
             <p className="text-base">
