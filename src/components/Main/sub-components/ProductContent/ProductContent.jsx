@@ -1,107 +1,112 @@
-import { useRef, useState } from "react";
-import Card from "./sub-components/Card";
-import CardCaption from "./sub-components/CardCaption";
-import CardTitle from "./sub-components/CardTitle";
-import Modal from "./sub-components/Modal";
-import rupiahFormater from "../../../../formater/rupiahFormater";
-import useAxiosPrivate from "../../../../hooks/useAxiosPrivate";
-import useAuth from "../../../../hooks/useAuth";
-import jwtDecode from "jwt-decode";
-import Spinner from "../../../Spinner";
-import { AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Button, useDisclosure, useToast } from "@chakra-ui/react";
+import { useRef, useState } from "react"
+import Card from "./sub-components/Card"
+import CardCaption from "./sub-components/CardCaption"
+import CardTitle from "./sub-components/CardTitle"
+import Modal from "./sub-components/Modal"
+import rupiahFormater from "../../../../formater/rupiahFormater"
+import useAxiosPrivate from "../../../../hooks/useAxiosPrivate"
+import useAuth from "../../../../hooks/useAuth"
+import jwtDecode from "jwt-decode"
+import Spinner from "../../../Spinner"
+import { AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Button, useDisclosure, useToast } from "@chakra-ui/react"
+import { useOutletContext } from "react-router-dom"
 
-const sendCart = async (axiosPrivate, payload, setLoading, setOpen, setSize, setQuantity, onClose, toast) => {
+const sendCart = async (axiosPrivate, payload, setLoading, setOpen, setSize, setQuantity, onClose, toast, setErrors, setTrigger) => {
   try {
-    const res = await axiosPrivate.post(`/carts?quantity=${payload.quantity}&user=${payload.user}&size=${payload.size}&product=${payload.product}`);
+    const res = await axiosPrivate.post(`/carts?quantity=${payload.quantity}&user=${payload.user}&size=${payload.size}&product=${payload.product}`)
     if (res.status != 200) {
-      throw new Error(res);
+      throw new Error(res)
     }
-    document.body.className = "";
-    setSize("");
-    setQuantity(1);
+    setTrigger(true)
+    document.body.className = ""
+    setSize("")
+    setQuantity(1)
     toast({
       title: "Item Added to Cart",
       description: "Item sucessfully Added",
       status: "success",
-      duration: 9000,
+      duration: 5000,
       position: "bottom-right",
       isClosable: true,
-    });
-    setOpen(false);
+    })
+
+    setOpen(false)
   } catch (error) {
-    console.log(error);
+    console.log(error)
   } finally {
-    onClose();
-    setLoading(false);
+    onClose()
+    setLoading(false)
   }
-};
+}
 
 export default function ProductContent({ product }) {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const toast = useToast();
-  const axiosPrivate = useAxiosPrivate();
-  const { auth } = useAuth();
-  const cancelRef = useRef();
-  const [Open, setOpen] = useState(false);
-  const [errors, setErrors] = useState({});
-  const [size, setSize] = useState("");
-  const [quantity, setQuantity] = useState(1);
-  const [loading, setLoading] = useState(false);
+  const { isOpen, onOpen, onClose } = useDisclosure()
+  const toast = useToast()
+  const axiosPrivate = useAxiosPrivate()
+  const { auth } = useAuth()
+  const cancelRef = useRef()
+  const [Open, setOpen] = useState(false)
+  const [errors, setErrors] = useState({})
+  const [size, setSize] = useState("")
+  const [quantity, setQuantity] = useState(1)
+  const [loading, setLoading] = useState(false)
+  const [setTrigger] = useOutletContext()
   const openModal = () => {
     setOpen(() => {
-      return true;
-    });
-    const body = document.body;
-    body.className = "overflow-hidden";
-  };
+      return true
+    })
+    const body = document.body
+    body.className = "overflow-hidden"
+  }
   const addToCartHandler = () => {
-    setLoading(true);
+    setLoading(true)
+
     const payload = {
       quantity: quantity,
       size: size,
       user: jwtDecode(auth).id,
       product: product._id,
-    };
-    console.log(quantity, size, jwtDecode(auth).id, product._id);
-    sendCart(axiosPrivate, payload, setLoading, setOpen, setSize, setQuantity, onClose, toast, setErrors);
-  };
+    }
+    console.log(quantity, size, jwtDecode(auth).id, product._id)
+    sendCart(axiosPrivate, payload, setLoading, setOpen, setSize, setQuantity, onClose, toast, setErrors, setTrigger)
+  }
   const subHandler = () => {
     if (quantity > 1) {
-      setErrors({});
+      setErrors({})
       setQuantity((prev) => {
-        return prev - 1;
-      });
+        return prev - 1
+      })
     }
-  };
+  }
   const addHandler = () => {
-    setErrors({});
+    setErrors({})
     const product_stock = product?.stock?.filter((st) => {
-      return st.size_id._id == size;
-    });
+      return st.size_id._id == size
+    })
     if (product_stock[0]?.quantity > quantity) {
       setQuantity((prev) => {
-        return prev + 1;
-      });
+        return prev + 1
+      })
     } else if (product_stock.length < 1) {
       setErrors((prev) => {
-        let temp = { ...prev };
-        temp.status = 400;
-        temp.message = "Please select size first";
-        return temp;
-      });
+        let temp = { ...prev }
+        temp.status = 400
+        temp.message = "Please select size first"
+        return temp
+      })
     } else {
       setErrors((prev) => {
-        let temp = { ...prev };
-        temp.status = 400;
-        temp.message = " Cannot add more, Run out of stock";
-        return temp;
-      });
+        let temp = { ...prev }
+        temp.status = 400
+        temp.message = " Cannot add more, Run out of stock"
+        return temp
+      })
     }
-  };
+  }
 
   return (
     <>
-      <Card className="hover:bg-primary bg-violetcursor-pointer group bg-back" onClick={openModal}>
+      <Card className="hover:bg-primary  cursor-pointer group  bg-back" onClick={openModal}>
         <img src={import.meta.env.VITE_BASE_URL + "/" + product.image} className=" h-[300px] object-cover" alt="uwu" />
         <CardTitle className="group-hover:text-white/75 transition-all text-white font-medium md:text-base text-left h-14 line-clamp-2">{product.name}</CardTitle>
         <CardCaption className="text-white font-semibold text-xl text-left group-hover:text-accent transition-colors">{rupiahFormater(product.price)}</CardCaption>
@@ -157,10 +162,10 @@ export default function ProductContent({ product }) {
                         <div key={i} className="w-fit flex flex-col items-center">
                           <button
                             onClick={() => {
-                              setErrors({});
-                              setSize(s.size_id._id);
+                              setErrors({})
+                              setSize(s.size_id._id)
                               if (quantity > s.quantity) {
-                                setQuantity(s.quantity);
+                                setQuantity(s.quantity)
                               }
                             }}
                             className={`border-accent/50 border-2 flex space-y-0 w-fit px-4 justify-center items-center py-1 ${size == s.size_id._id && "bg-accent"} rounded-md`}
@@ -169,7 +174,7 @@ export default function ProductContent({ product }) {
                           </button>
                           <h2> Stock : {s.quantity}</h2>
                         </div>
-                      );
+                      )
                     })}
                   </div>
                   <h2>Quantity</h2>
@@ -182,7 +187,7 @@ export default function ProductContent({ product }) {
                       className="text-primary rounded-md px-2"
                       value={quantity}
                       onChange={(e) => {
-                        setQuantity(parseInt(e.target.value));
+                        setQuantity(parseInt(e.target.value))
                       }}
                     />
                     <button onClick={addHandler} className="px-3 py-2 min-w-[40px] bg-violet-500 rounded-md flex justify-center items-center">
@@ -196,14 +201,14 @@ export default function ProductContent({ product }) {
                     onClick={() => {
                       if (size.length < 1) {
                         setErrors((prev) => {
-                          let temp = { ...prev };
-                          temp.status = 400;
-                          temp.message = "Please enter size !";
-                          return temp;
-                        });
-                        return;
+                          let temp = { ...prev }
+                          temp.status = 400
+                          temp.message = "Please enter size !"
+                          return temp
+                        })
+                        return
                       }
-                      onOpen();
+                      onOpen()
                     }}
                     className={`${!auth || quantity === 0 ? "bg-gray-500" : "bg-accent hover:bg-violet-950"}  transition-colors min-w-[200px]  py-2 px-4 text-white/90 rounded-lg`}
                   >
@@ -217,5 +222,5 @@ export default function ProductContent({ product }) {
         </Modal>
       )}
     </>
-  );
+  )
 }

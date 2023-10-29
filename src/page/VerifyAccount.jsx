@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { Link, Navigate, useNavigate } from "react-router-dom"
 import useAuth from "../hooks/useAuth"
 import jwtDecode from "jwt-decode"
 import { ButtonSpinner, Spinner } from "@chakra-ui/react"
 import useAxiosPrivate from "../hooks/useAxiosPrivate"
 
-const sendVerify = async (axiosClient, navigate, payload, setLoading) => {
+const sendVerify = async (axiosClient, navigate, payload, setLoading, setAuth) => {
   try {
     const response = await axiosClient.post("/verifyOTP", payload)
+    setAuth(response.data.accessToken)
     navigate("/")
   } catch (error) {
     console.error(error)
@@ -52,7 +53,7 @@ export default function VerifyAccount() {
     for (let i = 0; i < arr.length; i++) {
       input.push(arr[i].value)
     }
-    sendVerify(axiosClient, navigate, { otp: input.join("").toString() }, setLoading)
+    sendVerify(axiosClient, navigate, { otp: input.join("").toString() }, setLoading, setAuth)
     // console.log("submitted");
     // navigate("/");
   }
@@ -74,7 +75,9 @@ export default function VerifyAccount() {
   }, [timer, resendHandler])
   const minutes = Math.floor(timer / 60)
   const remainingSeconds = timer % 60
-
+  if (jwtDecode(auth)?.verified == true) {
+    return <Navigate to={"/"} />
+  }
   return (
     <div onPaste={pasteHandler} className="relative flex min-h-screen flex-col justify-center overflow-hidden bg-back py-12">
       <div className="relative bg-primary px-6 pt-10 pb-9 shadow-xl mx-auto w-full max-w-lg rounded-2xl">
