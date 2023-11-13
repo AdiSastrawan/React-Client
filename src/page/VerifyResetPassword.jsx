@@ -1,42 +1,53 @@
-import { useCallback, useEffect, useRef, useState } from "react"
-import { Link, Navigate, useNavigate } from "react-router-dom"
-import useAuth from "../hooks/useAuth"
-import jwtDecode from "jwt-decode"
 import { ButtonSpinner, Spinner } from "@chakra-ui/react"
-import useAxiosPrivate from "../hooks/useAxiosPrivate"
-
-const sendVerify = async (axiosClient, navigate, payload, setLoading, setAuth) => {
+import React, { useCallback, useEffect, useRef, useState } from "react"
+import { useLocation, useNavigate } from "react-router-dom"
+import axiosClient from "../axios-client"
+import useAuth from "../hooks/useAuth"
+const resendOTP = async (axiosClient, email) => {
   try {
-    const response = await axiosClient.post("/verifyOTP", payload)
-    setAuth(response.data.accessToken)
-    navigate("/")
+    const response = await axiosClient.post("/reset-password-resendOTP", { email: email })
   } catch (error) {
-    console.error(error)
+    console.log(error)
+  }
+}
+const resetPass = async (axiosClient, otp, setLoading, setAuth, navigate) => {
+  try {
+    const response = await axiosClient.post("/verify-reset-password", otp)
+    setAuth(undefined)
+    navigate("/login")
+  } catch (error) {
+    console.log(error)
   } finally {
     setLoading(false)
   }
 }
-const resendOTP = async (axiosClient) => {
-  try {
-    const response = await axiosClient.post("/resendOTP")
-  } catch (error) {
-    console.error(error)
-  }
-}
-export default function VerifyAccount() {
-  const { auth, setAuth } = useAuth()
-  const [loading, setLoading] = useState(false)
-  const [timer, setTimer] = useState(0)
-  const navigate = useNavigate()
+function VerifyResetPassword() {
+  const { setAuth } = useAuth()
   const firstRef = useRef()
+  const location = useLocation()
   const secondRef = useRef()
   const thirdRef = useRef()
   const fourthRef = useRef()
-  const axiosClient = useAxiosPrivate()
-  const changeInputHandler = (e, nextRef) => {
+  const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
+  const submitHandler = (e) => {
+    e.preventDefault()
+    const arr = e.target.getElementsByTagName("input")
+    let input = []
+    for (let i = 0; i < arr.length; i++) {
+      input.push(arr[i].value)
+    }
+    resetPass(axiosClient, { otp: input.join("").toString() }, setLoading, setAuth, navigate)
+  }
+  const [timer, setTimer] = useState(60)
+  const onInputInputHandler = (e, nextRef) => {
     nextRef.current.focus()
   }
-  console.log(auth)
+  const resendHandler = useCallback(() => {
+    resendOTP(axiosClient, location?.state?.email, setLoading)
+    setLoading(false)
+    setTimer(60)
+  }, [])
   const pasteHandler = (e) => {
     const pastedText = e.clipboardData.getData("text")
     firstRef.current.value = pastedText[0]
@@ -44,24 +55,6 @@ export default function VerifyAccount() {
     thirdRef.current.value = pastedText[2]
     fourthRef.current.value = pastedText[3]
   }
-  const submitHandler = (e) => {
-    e.preventDefault()
-    setLoading(true)
-    console.log(e.target)
-    const arr = e.target.getElementsByTagName("input")
-    let input = []
-    for (let i = 0; i < arr.length; i++) {
-      input.push(arr[i].value)
-    }
-    sendVerify(axiosClient, navigate, { otp: input.join("").toString() }, setLoading, setAuth)
-    // console.log("submitted");
-    // navigate("/");
-  }
-  const resendHandler = useCallback(() => {
-    resendOTP(axiosClient)
-    setLoading(false)
-    setTimer(60)
-  }, [])
   useEffect(() => {
     let interval
     if (timer > 0) {
@@ -75,25 +68,22 @@ export default function VerifyAccount() {
   }, [timer, resendHandler])
   const minutes = Math.floor(timer / 60)
   const remainingSeconds = timer % 60
-  if (jwtDecode(auth)?.verified == true) {
-    return <Navigate to={"/"} />
-  }
   return (
-    <div onPaste={pasteHandler} className="relative flex min-h-screen flex-col justify-center overflow-hidden bg-back py-12">
+    <div className="relative flex min-h-screen flex-col justify-center overflow-hidden bg-back py-12">
       <div className="relative bg-primary px-6 pt-10 pb-9 shadow-xl mx-auto w-full max-w-lg rounded-2xl">
         <div className="mx-auto flex w-full max-w-md flex-col space-y-16">
           <div className="flex flex-col items-center justify-center text-center space-y-2">
             <div className="font-semibold text-3xl text-white/90">
-              <p>Email Verification</p>
+              <p>Reset Password Verification</p>
             </div>
             <div className="flex flex-row text-sm font-medium text-gray-400">
               {" "}
-              <p>We have sent a code to your email {auth && jwtDecode(auth)?.email}</p>{" "}
+              <p>We have sent a code to your email {location?.state?.email} </p>{" "}
             </div>
           </div>
 
           <div>
-            <form onSubmit={submitHandler} action="" method="post">
+            <form onSubmit={submitHandler} onPaste={pasteHandler} action="" method="post">
               <div className="flex flex-col space-y-16">
                 <div className="flex flex-row items-center justify-between mx-auto w-full max-w-xs">
                   <div className="w-16 h-16 ">
@@ -104,8 +94,8 @@ export default function VerifyAccount() {
                       name=""
                       id=""
                       ref={firstRef}
-                      onChange={(e) => {
-                        changeInputHandler(e, secondRef)
+                      onInput={(e) => {
+                        onInputInputHandler(e, secondRef)
                       }}
                     />
                   </div>
@@ -117,8 +107,8 @@ export default function VerifyAccount() {
                       id=""
                       maxLength={1}
                       ref={secondRef}
-                      onChange={(e) => {
-                        changeInputHandler(e, thirdRef)
+                      onInput={(e) => {
+                        onInputInputHandler(e, thirdRef)
                       }}
                     />
                   </div>
@@ -130,8 +120,8 @@ export default function VerifyAccount() {
                       id=""
                       maxLength={1}
                       ref={thirdRef}
-                      onChange={(e) => {
-                        changeInputHandler(e, fourthRef)
+                      onInput={(e) => {
+                        onInputInputHandler(e, fourthRef)
                       }}
                     />
                   </div>
@@ -173,3 +163,5 @@ export default function VerifyAccount() {
     </div>
   )
 }
+
+export default VerifyResetPassword

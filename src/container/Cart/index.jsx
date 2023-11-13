@@ -1,57 +1,58 @@
-import { useEffect, useState } from "react";
-import useAxiosPrivate from "../../hooks/useAxiosPrivate";
-import Spinner from "../../components/Spinner";
+import { useEffect, useState } from "react"
+import useAxiosPrivate from "../../hooks/useAxiosPrivate"
+import Spinner from "../../components/Spinner"
 
-import { Link, useNavigate } from "react-router-dom";
-import useAuth from "../../hooks/useAuth";
-import rupiahFormater from "../../formater/rupiahFormater";
-import CartItem from "../../features/CartItem";
+import { Link, useNavigate } from "react-router-dom"
+import useAuth from "../../hooks/useAuth"
+import rupiahFormater from "../../formater/rupiahFormater"
+import CartItem from "../../features/CartItem"
 const selectAllCart = async (axiosClient, payload) => {
   try {
-    await axiosClient.put(`/carts/select/all`, payload);
-    console.log("yosha");
+    await axiosClient.put(`/carts/select/all`, payload)
+    console.log("yosha")
   } catch (error) {
-    console.log(error);
+    console.log(error)
   }
-};
+}
 const getCart = async (setData, setLoading, axiosClient) => {
   try {
-    const response = await axiosClient.get("/carts");
-    console.log(response.data);
+    const response = await axiosClient.get("/carts")
+    console.log(response.data)
     setData(() => {
       const temp = response.data.map((item) => {
         const product_stock = item.product.stock.filter((st) => {
-          return st.size_id == item.size._id;
-        })[0];
-        return { ...item, stock: product_stock.quantity };
-      });
-      return temp;
-    });
+          return st.size_id == item.size._id
+        })[0]
+        return { ...item, stock: product_stock.quantity }
+      })
+      return temp
+    })
   } catch (error) {
-    console.log(error);
+    console.log(error)
   } finally {
-    setLoading(false);
+    setLoading(false)
   }
-};
+}
 
 function Cart() {
-  const axiosClient = useAxiosPrivate();
-  const [data, setData] = useState([]);
-  const navigate = useNavigate();
+  const axiosClient = useAxiosPrivate()
+  const [data, setData] = useState([])
+  const navigate = useNavigate()
   const [total, setTotal] = useState({
     quantities: 0,
     prices: 0,
-  });
-  const [checkAll, setCheckAll] = useState(false);
-  const { auth } = useAuth();
-  const [loading, setLoading] = useState(auth ? true : false);
+  })
+  const [checkAll, setCheckAll] = useState(false)
+  const { auth } = useAuth()
+  const [loading, setLoading] = useState(auth ? true : false)
   useEffect(() => {
     if (auth) {
-      getCart(setData, setLoading, axiosClient);
+      console.log("fetch", auth)
+      getCart(setData, setLoading, axiosClient)
     }
-  }, [loading]);
+  }, [loading])
   const checkoutHandler = () => {
-    navigate("/checkout");
+    navigate("/checkout")
     // setIsCheckout(true);
     // let payload = {
     //   products: array.map((arr) => {
@@ -67,13 +68,13 @@ function Cart() {
     // };
     // let parsedPayload = JSON.stringify(payload);
     // sentCheckout(axiosClient, parsedPayload, navigate, setIsCheckout);
-  };
+  }
   return (
     <div>
       <ul className="text-white w-full relative ">
         <button
           onClick={() => {
-            navigate("/");
+            navigate("/")
           }}
           className="absolute top-20 text-3xl font-black bg-accent rounded-md px-4 items-center flex justify-center py-1 left-14"
         >
@@ -102,10 +103,10 @@ function Cart() {
                     <input
                       type="checkbox"
                       onClick={() => {
-                        selectAllCart(axiosClient, { isSelected: true });
+                        selectAllCart(axiosClient, { isSelected: true })
                         setCheckAll((prev) => {
-                          return !prev;
-                        });
+                          return !prev
+                        })
                       }}
                       checked={checkAll}
                       className=""
@@ -114,7 +115,7 @@ function Cart() {
                   <section className="flex flex-col my-5 gap-4 z-0">
                     {data.length < 1 && <h1 className="text-2xl mx-32 font-bold text-center my-48">Cart is Empty</h1>}
                     {data.map((item, i) => {
-                      return <CartItem item={item} i={i} key={i} setTotal={setTotal} setCheckAll={setCheckAll} checkAll={checkAll} setData={setData} data={data} setLoading={setLoading} />;
+                      return <CartItem item={item} i={i} key={i} setTotal={setTotal} setCheckAll={setCheckAll} checkAll={checkAll} setData={setData} data={data} setLoading={setLoading} />
                     })}
                   </section>
                 </div>
@@ -143,7 +144,7 @@ function Cart() {
         )}
       </ul>
     </div>
-  );
+  )
 }
 
-export default Cart;
+export default Cart

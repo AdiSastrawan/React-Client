@@ -1,44 +1,47 @@
-import jwtDecode from "jwt-decode";
-import Navlist from "./sub-components/Navlist";
-import Navlists from "./sub-components/Navlists";
-import useAuth from "../../hooks/useAuth";
-import { Link } from "react-router-dom";
-import { useState } from "react";
-import useAxiosPrivate from "../../hooks/useAxiosPrivate";
-import Spinner from "../Spinner";
+import jwtDecode from "jwt-decode"
+import Navlist from "./sub-components/Navlist"
+import Navlists from "./sub-components/Navlists"
+import useAuth from "../../hooks/useAuth"
+import { Link } from "react-router-dom"
+import { useEffect, useState } from "react"
+import useAxiosPrivate from "../../hooks/useAxiosPrivate"
+import Spinner from "../Spinner"
+import { ButtonSpinner } from "@chakra-ui/react"
 
 const sendLogout = async (axiosClient, setAuth, setLoading, setIsMenu) => {
   try {
-    await axiosClient.delete("/logout");
-    setAuth(undefined);
-    setIsMenu(false);
+    await axiosClient.delete("/logout")
+    setAuth(undefined)
+    setIsMenu(false)
   } catch (error) {
-    console.log(error);
+    console.log(error)
   } finally {
-    setLoading(false);
+    setLoading(false)
   }
-};
+}
 
-export default function Navbar() {
-  const [isMenu, setIsMenu] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const { auth, setAuth } = useAuth();
-  const axiosClient = useAxiosPrivate();
+export default function Navbar({ countCart = 0 }) {
+  const [isMenu, setIsMenu] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const { auth, setAuth } = useAuth()
+
+  const axiosClient = useAxiosPrivate()
   const menuHandler = () => {
     setIsMenu((prev) => {
-      return !prev;
-    });
-  };
+      return !prev
+    })
+  }
+
   const logoutHandler = () => {
-    setLoading(true);
-    sendLogout(axiosClient, setAuth, setLoading, setIsMenu);
-  };
+    setLoading(true)
+    sendLogout(axiosClient, setAuth, setLoading, setIsMenu)
+  }
   return (
     <div className="w-full z-[99999] text-white justify-between items-center flex py-3 px-10 fixed bg-primary">
       {isMenu && (
         <div
           onClick={() => {
-            setIsMenu(false);
+            setIsMenu(false)
           }}
           className="fixed top-0 bottom-0 z-[100] right-0 left-0 h-screen bg-transparent cursor-pointer"
         ></div>
@@ -47,10 +50,12 @@ export default function Navbar() {
         Logo
       </Link>
       <Navlists className="space-x-4 px-5 items-center">
-        <Navlist to={"cart"}>Cart</Navlist>
+        <Navlist className="relative" to={"cart"}>
+          Cart<span className={`text-xs bg-accent text-white absolute -top-2 -right-3 rounded-full w-4 h-4 flex justify-center ${!auth && "hidden"}`}>{countCart}</span>
+        </Navlist>
         {auth != undefined ? (
-          <div className="relative w-fit">
-            <button className={`bg-accent  ${isMenu ? "rounded-t-md border-b" : "rounded-md"}  outline-1 px-2 py-1`} onClick={menuHandler}>
+          <div className="relative min-w-[8rem]">
+            <button className={`bg-accent w-full  ${isMenu ? "rounded-t-md border-b" : "rounded-md"}  outline-1 px-2 py-1`} onClick={menuHandler}>
               {jwtDecode(auth).name}
             </button>
             <div>
@@ -59,7 +64,7 @@ export default function Navbar() {
                 onClick={logoutHandler}
                 className={`${isMenu ? "translate-y-0 opacity-100 z-[200] cursor-pointer" : "-translate-y-5 opacity-0 -z-40"} text-center bg-accent  w-full px-2 py-1 transition-all absolute    rounded-b-md`}
               >
-                {loading && <Spinner h={6} w={6} />} <span>Logout</span>
+                {loading ? <Spinner /> : <span>Logout</span>}
               </button>
             </div>
           </div>
@@ -68,5 +73,5 @@ export default function Navbar() {
         )}
       </Navlists>
     </div>
-  );
+  )
 }

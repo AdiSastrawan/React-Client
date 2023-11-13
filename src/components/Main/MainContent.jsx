@@ -1,13 +1,16 @@
-import React, { Suspense, useEffect, useRef, useState } from "react";
-import CarouselComponent from "./sub-components/CarouselComponent";
-import ProductContent from "./sub-components/ProductContent/ProductContent";
-import axiosClient from "../../axios-client";
-import Spinner from "../Spinner";
-import { Outlet } from "react-router-dom";
-import useProductFetch from "../../hooks/useProductFetch";
+import React, { Suspense, useEffect, useRef, useState } from "react"
+import CarouselComponent from "./sub-components/CarouselComponent"
+import ProductContent from "./sub-components/ProductContent/ProductContent"
+import axiosClient from "../../axios-client"
+import Spinner from "../Spinner"
+import { Outlet, useOutletContext } from "react-router-dom"
+import useProductFetch from "../../hooks/useProductFetch"
+import useAxiosPrivate from "../../hooks/useAxiosPrivate"
+import useAuth from "../../hooks/useAuth"
 
 export default function MainContent() {
-  const { data, loading, lastPostElement } = useProductFetch();
+  const { data, loading, lastPostElement } = useProductFetch()
+
   return (
     <main id="main" className=" bg-back min-h-screen pt-16 z-50">
       <section className="-z-20">
@@ -17,7 +20,7 @@ export default function MainContent() {
       <section className="grid grid-cols-3 lg:grid-cols-4 gap-3 px-2 py-5 bg-prime">
         <Suspense fallback={<h1 className="text-white font-bold text-3xl">Loading ...</h1>}>
           {data?.map((product, i) => {
-            return <ProductContent product={product} key={i} />;
+            return <ProductContent product={product} key={i} />
           })}
         </Suspense>
       </section>
@@ -27,7 +30,6 @@ export default function MainContent() {
         </div>
       )}
       <div className=" py-2 w-full " ref={lastPostElement}></div>
-      <Outlet />
     </main>
-  );
+  )
 }

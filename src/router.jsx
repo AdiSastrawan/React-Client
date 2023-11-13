@@ -10,11 +10,18 @@ import Checkout from "./container/Checkout"
 import Error from "./container/Error"
 import RequireAuth from "./layouts/RequireAuth"
 import VerifyAccount from "./page/VerifyAccount"
+import ResetPassword from "./page/ResetPassword"
+import VerifyResetPassword from "./page/VerifyResetPassword"
 
 const router = createBrowserRouter([
   {
     element: <PersistLogin />,
     children: [
+      { path: "/login", element: <Login /> },
+      { path: "/register", element: <Register /> },
+      { path: "/reset-password", element: <ResetPassword /> },
+      { path: "/verify-reset-password", element: <VerifyResetPassword /> },
+      { path: "/verify-account", element: <VerifyAccount /> },
       {
         element: <Default />,
         children: [
@@ -26,14 +33,11 @@ const router = createBrowserRouter([
               { path: "checkout", element: <Checkout /> },
             ],
           },
-          { path: "/", errorElement: <Error />, element: <MainContent />, children: [{ path: "login", element: <Login /> }] },
+          { path: "/", errorElement: <Error />, element: <MainContent /> },
         ],
       },
     ],
   },
-
-  { path: "/register", element: <Register /> },
-  { path: "/verify-account", element: <VerifyAccount /> },
 ])
 
 export default router
