@@ -7,7 +7,7 @@ import { Spinner } from "@chakra-ui/react"
 const sendRegister = async (navigate, payload, setLoading) => {
   try {
     await axiosClient.post("/register", payload)
-    navigate("/verify-account")
+    navigate("/verify-account", { state: { email: payload.email } })
   } catch (error) {
     console.error(error)
   } finally {
@@ -79,11 +79,11 @@ export default function Register() {
   }
   return (
     <div className="bg-back min-h-screen flex justify-center items-center text-black">
-      <div className="lg:w-1/2">
+      <div className="lg:w-1/2 min-w-[50vw] px-10 pb-20 mx-2 bg-primary rounded-md p-4 sm:p-6">
         <h1 className="text-3xl text-white text-center py-4 font-bold">Register</h1>
         <form className="flex flex-col text-white space-y-1" action="" onSubmit={submitHandler}>
           <label htmlFor="username">Username</label>
-          <input className="rounded-md px-2 py-1 text-black" type="text" ref={username} name="username" placeholder="Username" />
+          <input className="rounded-md px-2 py-1 text-black focus:outline-accent" type="text" ref={username} name="username" placeholder="Username" />
           {error?.error?.username?.message.map((e, i) => {
             return (
               <p key={i} className="text-red-600 text-xs">
@@ -92,7 +92,7 @@ export default function Register() {
             )
           })}
           <label htmlFor="email">Email</label>
-          <input className="rounded-md px-2 py-1 text-black" type="text" ref={email} name="email" placeholder="Email" />
+          <input className="rounded-md px-2 py-1 text-black focus:outline-accent" type="text" ref={email} name="email" placeholder="Email" />
           {error?.error?.email?.message.map((e, i) => {
             return (
               <p key={i} className="text-red-600 text-xs">
@@ -101,7 +101,7 @@ export default function Register() {
             )
           })}
           <label htmlFor="password">Password</label>
-          <input className="rounded-md px-2 py-1 text-black" type="password" ref={password} name="password" placeholder="Password" />
+          <input className="rounded-md px-2 py-1 text-black focus:outline-accent" type="password" ref={password} name="password" placeholder="Password" />
           {error?.error?.password?.message.map((e, i) => {
             return (
               <p key={i} className="text-red-600 text-xs">
@@ -110,7 +110,7 @@ export default function Register() {
             )
           })}
           <label htmlFor="confirm_password">Confirm Password</label>
-          <input className="rounded-md px-2 py-1 text-black" type="password" ref={confirm_password} name="confirm_password" placeholder="Confirm Password" />
+          <input className="rounded-md px-2 py-1 text-black focus:outline-accent" type="password" ref={confirm_password} name="confirm_password" placeholder="Confirm Password" />
           {error?.error?.confirm_password?.message.map((e, i) => {
             return (
               <p key={i} className="text-red-600 text-xs">

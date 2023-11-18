@@ -17,7 +17,7 @@ function Transaction() {
   }, [timer])
   return (
     <div className="bg-back flex justify-center items-center py-32">
-      <div className="bg-accent w-1/2 rounded-md">
+      <div className="bg-accent sm:w-1/2 rounded-md">
         <h1 className="font-bold text-xl text-white py-2 px-2 text-center w-full ">Checkout Successfully</h1>
         <div className="bg-primary text-white p-4 text-center space-y-2">
           <p>Invoice has already sent to your email</p>

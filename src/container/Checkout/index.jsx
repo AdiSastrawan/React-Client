@@ -118,9 +118,9 @@ function Checkout() {
         </div>
       ) : (
         <>
-          <h1 className="text-white text-2xl font-bold px-20 my-6 ">Checkout</h1>
-          <div className="flex px-20 pb-10 text-white gap-2">
-            <div className="flex flex-col py-2 rounded-md w-2/3 space-y-3">
+          <h1 className="text-white text-2xl font-bold px-2 sm:px-20 my-6 ">Checkout</h1>
+          <div className="flex flex-col sm:flex-row px-2 sm:px-20 pb-10 text-white gap-2">
+            <div className="flex flex-col py-2 rounded-md sm:w-2/3 space-y-3">
               <div className="flex p-2 bg-primary rounded-md space-x-3 flex-col ">
                 <h2 className="px-2 font-bold text-xl">Shipment</h2>
                 <div className="flex-col flex space-y-1">
@@ -158,8 +158,8 @@ function Checkout() {
                 </div>
               </div>
             </div>
-            <div className="w-1/3">
-              <div className={"mr-10  w-fit fixed  bg-primary rounded-md px-4 py-4"}>
+            <div className=" sm:w-1/3">
+              <div className={"sm:mr-10 w-full  sm:w-fit sm:fixed  bg-primary rounded-md px-4 py-4"}>
                 <h1 className="text-2xl pb-4 font-bold">Total Purchases</h1>
                 <div className=" h-[12rem] overflow-y-auto">
                   <div className="overflow-auto">
