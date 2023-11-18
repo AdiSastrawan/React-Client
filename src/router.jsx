@@ -17,11 +17,11 @@ const router = createBrowserRouter([
   {
     element: <PersistLogin />,
     children: [
-      { path: "/login", element: <Login /> },
-      { path: "/register", element: <Register /> },
-      { path: "/reset-password", element: <ResetPassword /> },
-      { path: "/verify-reset-password", element: <VerifyResetPassword /> },
-      { path: "/verify-account", element: <VerifyAccount /> },
+      { path: "/login", element: <Login />, errorElement: <Error /> },
+      { path: "/register", element: <Register />, errorElement: <Error /> },
+      { path: "/reset-password", element: <ResetPassword />, errorElement: <Error /> },
+      { path: "/verify-reset-password", element: <VerifyResetPassword />, errorElement: <Error /> },
+      { path: "/verify-account", element: <VerifyAccount />, errorElement: <Error /> },
       {
         element: <Default />,
         children: [

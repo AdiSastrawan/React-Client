@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react"
-import { Link, Navigate, useNavigate } from "react-router-dom"
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom"
 import useAuth from "../hooks/useAuth"
 import jwtDecode from "jwt-decode"
 import { ButtonSpinner, Spinner } from "@chakra-ui/react"
@@ -16,6 +16,16 @@ const sendVerify = async (axiosClient, navigate, payload, setLoading, setAuth) =
     setLoading(false)
   }
 }
+const sendLogout = async (axiosClient, setAuth, navigate) => {
+  try {
+    await axiosClient.delete("/logout")
+    setAuth(undefined)
+    navigate("/login")
+  } catch (error) {
+    console.log(error)
+  }
+}
+
 const resendOTP = async (axiosClient) => {
   try {
     const response = await axiosClient.post("/resendOTP")
@@ -28,6 +38,7 @@ export default function VerifyAccount() {
   const [loading, setLoading] = useState(false)
   const [timer, setTimer] = useState(0)
   const navigate = useNavigate()
+  const location = useLocation()
   const firstRef = useRef()
   const secondRef = useRef()
   const thirdRef = useRef()
@@ -53,7 +64,7 @@ export default function VerifyAccount() {
     for (let i = 0; i < arr.length; i++) {
       input.push(arr[i].value)
     }
-    sendVerify(axiosClient, navigate, { otp: input.join("").toString() }, setLoading, setAuth)
+    sendVerify(axiosClient, navigate, { otp: input.join("").toString(), email: location?.state?.email }, setLoading, setAuth)
     // console.log("submitted");
     // navigate("/");
   }
@@ -73,10 +84,17 @@ export default function VerifyAccount() {
       clearInterval(interval)
     }
   }, [timer, resendHandler])
+  const onLoginHandler = () => {
+    if (auth) {
+      sendLogout(axiosClient, setAuth, navigate)
+    } else {
+      navigate("/login")
+    }
+  }
   const minutes = Math.floor(timer / 60)
   const remainingSeconds = timer % 60
-  if (jwtDecode(auth)?.verified == true) {
-    return <Navigate to={"/"} />
+  if (auth) {
+    if (jwtDecode(auth).verified == true) return <Navigate to={"/"} />
   }
   return (
     <div onPaste={pasteHandler} className="relative flex min-h-screen flex-col justify-center overflow-hidden bg-back py-12">
@@ -88,7 +106,7 @@ export default function VerifyAccount() {
             </div>
             <div className="flex flex-row text-sm font-medium text-gray-400">
               {" "}
-              <p>We have sent a code to your email {auth && jwtDecode(auth)?.email}</p>{" "}
+              <p>We have sent a code to your email {location?.state?.email}</p>{" "}
             </div>
           </div>
 
@@ -147,26 +165,33 @@ export default function VerifyAccount() {
                   </div>
                 </div>
 
-                <div className="flex flex-col space-y-5">
+                <div className="flex flex-col space-y-5 ">
                   <div>
                     <button className="flex flex-row items-center justify-center text-center w-full border rounded-xl outline-none py-5 bg-accent border-none text-white text-sm shadow-sm">
                       {loading ? <ButtonSpinner /> : "Verify Account"}
                     </button>
                   </div>
-
-                  <div className="flex flex-row items-center justify-center text-center text-sm font-medium space-x-1 text-gray-500">
-                    <p>Didn't recieve code?</p>{" "}
-                    <button disabled={timer > 0} onClick={resendHandler} className={`flex flex-row items-center ${timer > 0 ? "text-secondary" : "text-blue-600"}`}>
-                      Resend
-                    </button>
-                    <span className={`${timer == 0 && "hidden"}`}>
-                      {" "}
-                      {minutes}:{remainingSeconds < 10 ? `0${remainingSeconds}` : remainingSeconds}
-                    </span>
-                  </div>
                 </div>
               </div>
             </form>
+            <div className="flex flex-row justify-between text-center py-8 text-sm font-medium space-x-1 text-gray-500">
+              <div className="flex items-center justify-center">
+                <p>Didn't recieve code?</p>{" "}
+                <button disabled={timer > 0} onClick={resendHandler} className={`flex flex-row items-center ${timer > 0 ? "text-secondary" : "text-blue-600"}`}>
+                  Resend
+                </button>
+                <span className={`${timer == 0 && "hidden"}`}>
+                  {" "}
+                  {minutes}:{remainingSeconds < 10 ? `0${remainingSeconds}` : remainingSeconds}
+                </span>
+              </div>
+              <div className="flex ">
+                <p>Already have an account? </p>
+                <button onClick={onLoginHandler} className="flex flex-row items-center text-accent">
+                  Login Here
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>

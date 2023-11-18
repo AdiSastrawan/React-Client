@@ -10,6 +10,7 @@ import jwtDecode from "jwt-decode"
 import Spinner from "../../../Spinner"
 import { AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Button, useDisclosure, useToast } from "@chakra-ui/react"
 import { useOutletContext } from "react-router-dom"
+import { CloseIcon } from "@chakra-ui/icons"
 
 const sendCart = async (axiosPrivate, payload, setLoading, setOpen, setSize, setQuantity, onClose, toast, setErrors, setTrigger) => {
   try {
@@ -45,6 +46,7 @@ export default function ProductContent({ product }) {
   const axiosPrivate = useAxiosPrivate()
   const { auth } = useAuth()
   const cancelRef = useRef()
+  const [previewedImage, setPreviewedImage] = useState(Array.isArray(product.image) == true ? product.image[0] : product.image)
   const [Open, setOpen] = useState(false)
   const [errors, setErrors] = useState({})
   const [size, setSize] = useState("")
@@ -108,12 +110,12 @@ export default function ProductContent({ product }) {
     <>
       <Card className="hover:bg-primary  cursor-pointer group  bg-back" onClick={openModal}>
         <img src={import.meta.env.VITE_BASE_URL + "/" + product.image} className=" h-[300px] object-cover" alt="uwu" />
-        <CardTitle className="group-hover:text-white/75 transition-all text-white font-medium md:text-base text-left h-14 line-clamp-2">{product.name}</CardTitle>
-        <CardCaption className="text-white font-semibold text-xl text-left group-hover:text-accent transition-colors">{rupiahFormater(product.price)}</CardCaption>
+        <CardTitle className="hidden sm:block group-hover:text-white/75 transition-all text-white font-medium md:text-base text-left h-14 line-clamp-2">{product.name}</CardTitle>
+        <CardCaption className="hidden sm:block text-white font-semibold text-xl text-left group-hover:text-accent transition-colors">{rupiahFormater(product.price)}</CardCaption>
       </Card>
       <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose}>
-        <AlertDialogOverlay>
-          <AlertDialogContent bgColor={"#0d1117"}>
+        <AlertDialogOverlay mx={2}>
+          <AlertDialogContent mx={2} bgColor={"#0d1117"}>
             <AlertDialogHeader fontSize="lg" fontWeight="bold" color="white">
               Add Item to Cart
             </AlertDialogHeader>
@@ -141,22 +143,47 @@ export default function ProductContent({ product }) {
       </AlertDialog>
       {Open && (
         <Modal isOpen={Open} setIsOpen={setOpen}>
-          <div className="max-h-[520px] mt-10 my-5 bg-primary rounded-md flex items-center flex-col overflow-y-auto overflow-x-hidden">
-            <h2 className="pt-4  font-black text-3xl">{product.name}</h2>
-            <div className="bg-primary gap-10 px-10 py-5 w-full grid grid-cols-2">
+          <div className="max-h-[520px]  mt-10 my-5 bg-primary rounded-md flex items-center flex-col overflow-y-auto overflow-x-hidden relative">
+            <button
+              onClick={() => {
+                document.body.className = ""
+                setOpen(false)
+              }}
+              className="fixed top-0 right-0 p-2 sm:hidden"
+            >
+              <CloseIcon />
+            </button>
+            <h2 className="pt-4  font-black text-base sm:text-3xl px-2 text-center">{product.name}</h2>
+            <div className="bg-primary sm:gap-10 gap-2 px-10 py-5 w-full flex flex-col sm:grid sm:grid-cols-2">
               <div className="flex flex-col gap-2">
-                <img src={import.meta.env.VITE_BASE_URL + "/" + product.image} alt="" />
+                <img src={import.meta.env.VITE_BASE_URL + "/" + previewedImage} alt="" />
                 <div className="grid grid-cols-4 ">
-                  <div className="cursor-pointer">
-                    <img className="object-contain" src={import.meta.env.VITE_BASE_URL + "/" + product.image} alt="" />
-                  </div>
+                  {Array.isArray(product.image) == true ? (
+                    product.image.map((img, i) => {
+                      return (
+                        <div
+                          key={i}
+                          className="cursor-pointer"
+                          onClick={() => {
+                            setPreviewedImage(img)
+                          }}
+                        >
+                          <img className="object-contain" src={import.meta.env.VITE_BASE_URL + "/" + img} alt="" />
+                        </div>
+                      )
+                    })
+                  ) : (
+                    <div className="cursor-pointer">
+                      <img className="object-contain" src={import.meta.env.VITE_BASE_URL + "/" + product.image} alt="" />
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="flex flex-col space-y-4">
                 <h2 className="text-2xl font-semibold ">{rupiahFormater(product.price)}</h2>
-                <div className=" space-y-2">
-                  <h2 className="font-medium text-lg">Size</h2>
-                  <div className="grid grid-cols-5 gap-1 text-base">
+                <div className=" flex flex-col space-y-2">
+                  <div className="font-medium text-lg">Size</div>
+                  <div className=" flex flex-wrap sm:grid sm:grid-cols-5 gap-1 text-base">
                     {product.stock.map((s, i) => {
                       return (
                         <div key={i} className="w-fit flex flex-col items-center">
@@ -168,23 +195,25 @@ export default function ProductContent({ product }) {
                                 setQuantity(s.quantity)
                               }
                             }}
-                            className={`border-accent/50 border-2 flex space-y-0 w-fit px-4 justify-center items-center py-1 ${size == s.size_id._id && "bg-accent"} rounded-md`}
+                            className={`border-accent/50 border-2 text-xs flex space-y-0 w-fit px-4 justify-center items-center py-1 ${size == s.size_id._id && "bg-accent"} rounded-md`}
                           >
                             <h2>{s.size_id.name} </h2>
                           </button>
-                          <h2> Stock : {s.quantity}</h2>
+                          <h2 className="text-xs sm:text-base"> Stock : {s.quantity}</h2>
                         </div>
                       )
                     })}
                   </div>
-                  <h2>Quantity</h2>
+                  <div>
+                    <h2>Quantity</h2>
+                  </div>
                   <div className="flex gap-2">
                     <button onClick={subHandler} className="px-3 py-2 min-w-[40px] bg-violet-500 rounded-md flex justify-center items-center">
                       -
                     </button>
                     <input
                       type="number"
-                      className="text-primary rounded-md px-2"
+                      className="text-primary rounded-md px-2 w-2/3 sm:w-full"
                       value={quantity}
                       onChange={(e) => {
                         setQuantity(parseInt(e.target.value))
@@ -194,8 +223,11 @@ export default function ProductContent({ product }) {
                       +
                     </button>
                   </div>
-                  {!auth && <h1 className="bg-red-500 py-2 px-2 rounded-md">Login first before you add it to your cart!</h1>}
-                  {Object.keys(errors).length !== 0 && <h1 className="bg-red-500 py-2 px-2 rounded-md">{errors.message}</h1>}
+                  <div>
+                    {!auth && <h1 className="bg-red-500 py-2 px-2 text-sm sm:text-base rounded-md">Login first before you add it to your cart!</h1>}
+                    {Object.keys(errors).length !== 0 && <h1 className="bg-red-500 py-2 px-2 text-sm sm:text-base rounded-md">{errors.message}</h1>}
+                  </div>
+
                   <button
                     disabled={!auth || quantity === 0 ? true : loading}
                     onClick={() => {
@@ -214,7 +246,9 @@ export default function ProductContent({ product }) {
                   >
                     Add to Cart
                   </button>
-                  <p>{product?.desc}</p>
+                </div>
+                <div className="order-first sm:order-last">
+                  <div className="">{product?.desc}</div>
                 </div>
               </div>
             </div>

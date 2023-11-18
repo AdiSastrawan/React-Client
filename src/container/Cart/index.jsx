@@ -6,6 +6,7 @@ import { Link, useNavigate } from "react-router-dom"
 import useAuth from "../../hooks/useAuth"
 import rupiahFormater from "../../formater/rupiahFormater"
 import CartItem from "../../features/CartItem"
+import { ChevronLeftIcon } from "@chakra-ui/icons"
 const selectAllCart = async (axiosClient, payload) => {
   try {
     await axiosClient.put(`/carts/select/all`, payload)
@@ -76,17 +77,17 @@ function Cart() {
           onClick={() => {
             navigate("/")
           }}
-          className="absolute top-20 text-3xl font-black bg-accent rounded-md px-4 items-center flex justify-center py-1 left-14"
+          className="absolute top-20 text-2xl sm:text-3xl font-black bg-accent rounded-md px-4 items-center flex justify-center py-1 left-3 sm:left-14"
         >
-          {"<"}
+          <ChevronLeftIcon />
         </button>
         {loading ? (
           <div className="w-full h-screen flex justify-center items-center">
             <Spinner />
           </div>
         ) : (
-          <div className=" flex ">
-            <div className=" w-3/5 max-w-fit ">
+          <div className=" flex flex-col sm:flex-row">
+            <div className=" sm:w-3/5 max-w-fit ">
               {auth == undefined ? (
                 <h1 className="text-2xl mx-32 text-center my-48">
                   {" "}
@@ -96,7 +97,7 @@ function Cart() {
                   </Link>{" "}
                 </h1>
               ) : (
-                <div className="bg-back mx-32 my-28">
+                <div className="bg-back mx-2 sm:mx-32 mt-32  sm:my-28">
                   <h1 className="font-bold text-3xl">Cart</h1>
                   <div className="flex items-center space-x-2">
                     <label htmlFor="">Select all</label>
@@ -121,8 +122,8 @@ function Cart() {
                 </div>
               )}
             </div>
-            <div className=" w-2/5 h-screen ">
-              <div className={"mr-32 my-32 w-[360px] fixed bg-primary rounded-md px-4 py-4"}>
+            <div className=" sm:w-2/5 h-screen ">
+              <div className={" sm:mr-32 my-32 sm:w-[360px] sm:fixed bg-primary rounded-md px-4 py-4"}>
                 <h1 className="text-2xl pb-4 font-bold">Total Purchases</h1>
                 <div className="flex">
                   <h2>Total Price ({total.quantities} items) :</h2>

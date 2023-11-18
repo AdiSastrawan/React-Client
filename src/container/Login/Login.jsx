@@ -40,8 +40,8 @@ export default function Login() {
     return <Navigate to={"/"} />
   }
   return (
-    <div className="bg-back w-full min-h-screen flex justify-center items-center ">
-      <div className="min-w-[50vw]    text-white">
+    <div className="bg-back  min-h-screen flex justify-center items-center ">
+      <div className="min-w-[50vw] mx-2 sm:mx-0   text-white">
         <div className="max-h-[520px] pb-20 px-10 my-5 bg-primary rounded-md flex items-center flex-col overflow-y-auto overflow-x-hidden">
           <h2 className="text-white text-2xl py-10 font-bold">Login</h2>
           <form action="" className="flex flex-col space-y-2 w-full" onSubmit={submitHandler}>
@@ -56,12 +56,12 @@ export default function Login() {
               {loading ? <Spinner /> : "Login"}
             </button>
           </form>
-          <div className="w-full px-2 pt-2 flex justify-between">
+          <div className="w-full sm:px-2 pt-2 flex justify-between">
             <Link to={"/reset-password"} className="text-xs text-left hover:text-accent transition-all">
               Forgot Password?
             </Link>
             <div>
-              <p className="text-xs">
+              <p className="text-xs text-end">
                 {"Don't have any account? "}
                 <span>
                   <Link to="/register" className="text-accent hover:text-violet-950 transition-colors underline">
